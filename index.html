@@ -1,0 +1,658 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="Acuity Finance helps you compare loan options, estimate repayments, and apply through a clear digital process.">
+    <title>Acuity Finance | Finance made simple.</title>
+    <link rel="stylesheet" href="styles.css">
+    <style>
+        /* New comprehensive styling */
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body { font-family: 'Manrope', sans-serif; background: #f5f7fa; color: #333; }
+        
+        /* Layout */
+        .page { display: none; }
+        .page.active { display: block; }
+        
+        /* Navigation */
+        nav { background: white; padding: 1rem 2rem; border-bottom: 1px solid #eee; }
+        nav .logo { font-weight: 700; color: #1a73e8; text-decoration: none; }
+        nav .nav-right { float: right; }
+        nav button { background: none; border: none; cursor: pointer; padding: 0.5rem 1rem; color: #666; }
+        nav button:hover { color: #1a73e8; }
+        
+        /* Main container */
+        .container { max-width: 1200px; margin: 2rem auto; padding: 0 1rem; }
+        
+        /* Cards */
+        .card { background: white; border-radius: 8px; padding: 2rem; margin-bottom: 1.5rem; box-shadow: 0 1px 3px rgba(0,0,0,0.1); }
+        .card h2 { margin-bottom: 1.5rem; color: #1a73e8; }
+        
+        /* Forms */
+        .form-row { display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; margin-bottom: 1rem; }
+        .form-row.full { grid-template-columns: 1fr; }
+        label { display: block; margin-bottom: 0.5rem; font-weight: 500; }
+        input, select, textarea { width: 100%; padding: 0.75rem; border: 1px solid #ddd; border-radius: 4px; font-family: inherit; }
+        input:focus, select:focus, textarea:focus { outline: none; border-color: #1a73e8; box-shadow: 0 0 0 3px rgba(26,115,232,0.1); }
+        textarea { resize: vertical; min-height: 100px; }
+        
+        /* Buttons */
+        .btn { padding: 0.75rem 1.5rem; border: none; border-radius: 4px; cursor: pointer; font-weight: 500; transition: all 0.3s; }
+        .btn-primary { background: #1a73e8; color: white; }
+        .btn-primary:hover { background: #1557b0; }
+        .btn-secondary { background: #f0f0f0; color: #333; }
+        .btn-secondary:hover { background: #e0e0e0; }
+        .btn-danger { background: #d32f2f; color: white; }
+        .btn-danger:hover { background: #b71c1c; }
+        .btn-small { padding: 0.5rem 1rem; font-size: 0.875rem; }
+        .btn-block { width: 100%; }
+        
+        /* Dashboard */
+        .stats { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 1.5rem; margin-bottom: 2rem; }
+        .stat-card { background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; padding: 1.5rem; border-radius: 8px; }
+        .stat-card.stat2 { background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%); }
+        .stat-card.stat3 { background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%); }
+        .stat-card.stat4 { background: linear-gradient(135deg, #43e97b 0%, #38f9d7 100%); }
+        .stat-card h3 { font-size: 0.875rem; opacity: 0.9; margin-bottom: 0.5rem; }
+        .stat-card .value { font-size: 2rem; font-weight: 700; }
+        
+        /* Tables */
+        table { width: 100%; border-collapse: collapse; }
+        table th { background: #f5f5f5; padding: 1rem; text-align: left; font-weight: 600; border-bottom: 2px solid #ddd; }
+        table td { padding: 1rem; border-bottom: 1px solid #ddd; }
+        table tr:hover { background: #f9f9f9; }
+        .table-actions { display: flex; gap: 0.5rem; }
+        
+        /* Modals */
+        .modal-overlay { display: none; position: fixed; top: 0; left: 0; right: 0; bottom: 0; background: rgba(0,0,0,0.5); z-index: 1000; }
+        .modal-overlay.active { display: flex; align-items: center; justify-content: center; }
+        /* Keep staff dialogs independent from the legacy public-site .modal rule in styles.css. */
+        .modal-overlay .modal { opacity: 1; visibility: visible; inset: auto; z-index: auto; display: block; padding: 0; background: white; border-radius: 8px; max-width: 600px; width: 90%; max-height: 90vh; overflow-y: auto; position: relative; transition: none; }
+        .modal-header { padding: 1.5rem; border-bottom: 1px solid #eee; display: flex; justify-content: space-between; align-items: center; }
+        .modal-body { padding: 1.5rem; }
+        .modal-footer { padding: 1.5rem; border-top: 1px solid #eee; display: flex; gap: 1rem; justify-content: flex-end; }
+        .modal-close { background: none; border: none; font-size: 1.5rem; cursor: pointer; color: #999; }
+        
+        /* Alerts */
+        .alert { padding: 1rem; border-radius: 4px; margin-bottom: 1rem; }
+        .alert-success { background: #c8e6c9; color: #2e7d32; border-left: 4px solid #2e7d32; }
+        .alert-error { background: #ffcdd2; color: #c62828; border-left: 4px solid #c62828; }
+        .alert-info { background: #bbdefb; color: #1565c0; border-left: 4px solid #1565c0; }
+        
+        /* Steps */
+        .step-indicator { display: flex; justify-content: space-between; margin-bottom: 2rem; }
+        .step { flex: 1; text-align: center; position: relative; }
+        .step::before { content: ''; position: absolute; top: 20px; left: 50%; right: -50%; height: 2px; background: #ddd; z-index: -1; }
+        .step:last-child::before { display: none; }
+        .step.active::before { background: #1a73e8; }
+        .step-number { width: 40px; height: 40px; border-radius: 50%; background: #ddd; color: #999; font-weight: 700; display: inline-flex; align-items: center; justify-content: center; margin-bottom: 0.5rem; }
+        .step.active .step-number { background: #1a73e8; color: white; }
+        .step-text { font-size: 0.875rem; }
+        
+        /* Responsive */
+        @media (max-width: 768px) {
+            .form-row { grid-template-columns: 1fr; }
+            .stats { grid-template-columns: 1fr; }
+            .modal { width: 95%; }
+        }
+        
+        /* Utilities */
+        .mt { margin-top: 1rem; }
+        .mb { margin-bottom: 1rem; }
+        .text-center { text-align: center; }
+        .text-muted { color: #999; }
+        .d-none { display: none; }
+        .status-badge { display: inline-block; padding: 0.25rem 0.75rem; border-radius: 20px; font-size: 0.875rem; font-weight: 500; }
+        .status-pending { background: #fff3cd; color: #856404; }
+        .status-verified { background: #d4edda; color: #155724; }
+        .status-approved { background: #d1ecf1; color: #0c5460; }
+        .status-rejected { background: #f8d7da; color: #721c24; }
+    </style>
+    <style>
+        /* Finora interface refresh */
+        :root { --ui-navy: #102a43; --ui-blue: #146ef5; --ui-sky: #eaf2ff; --ui-bg: #f6f8fc; --ui-text: #23364d; --ui-muted: #718096; --ui-border: #e4eaf2; }
+        body { background: var(--ui-bg) !important; color: var(--ui-text) !important; font-family: Inter, ui-sans-serif, system-ui, sans-serif !important; }
+        nav { background: #fff !important; border-bottom: 1px solid var(--ui-border) !important; padding: 1rem clamp(1rem, 4vw, 3rem) !important; box-shadow: 0 2px 12px #102a4308; }
+        nav .logo { color: var(--ui-navy) !important; font: 800 1.2rem Inter, sans-serif !important; letter-spacing: -.04em; }
+        nav .logo span { color: var(--ui-muted) !important; font-size: .7rem; letter-spacing: 0; margin-left: .3rem; }
+        nav button:not(.btn), .nav-link { color: var(--ui-text) !important; font-weight: 700 !important; }
+        .nav-apply, .btn-primary { background: var(--ui-blue) !important; color: #fff !important; border-radius: 8px !important; box-shadow: 0 5px 12px #146ef52b; }
+        .page .container { max-width: 1180px; margin: 0 auto; padding: 2.5rem 1.25rem; }
+        h1, h2, h3, .hero-copy h1, .public-section h2 { font-family: Inter, ui-sans-serif, system-ui, sans-serif !important; letter-spacing: -.045em !important; color: var(--ui-navy) !important; }
+        h1 { font-size: clamp(2.2rem, 4vw, 4rem) !important; font-weight: 800; }
+        h2 { font-size: clamp(1.7rem, 3vw, 2.5rem) !important; font-weight: 800; }
+        .card { border: 1px solid var(--ui-border); border-radius: 14px !important; box-shadow: 0 8px 24px #102a4309 !important; padding: clamp(1.25rem, 3vw, 2rem) !important; }
+        .card h2 { color: var(--ui-navy) !important; margin-bottom: 1.25rem !important; }
+        input, select, textarea { border: 1px solid #d9e1ec !important; border-radius: 8px !important; background: #fff; color: var(--ui-text); }
+        input:focus, select:focus, textarea:focus { border-color: var(--ui-blue) !important; box-shadow: 0 0 0 3px #146ef51c !important; }
+        .form-row { gap: 1.25rem; margin-bottom: 1.15rem; }
+        .stats { gap: 1rem !important; }
+        .stat-card { background: var(--ui-navy) !important; border-radius: 12px !important; padding: 1.25rem !important; box-shadow: 0 8px 20px #102a4317; }
+        .stat-card.stat2 { background: #146ef5 !important; }
+        .stat-card.stat3 { background: #118a8a !important; }
+        .stat-card.stat4 { background: #e79b32 !important; }
+        .stat-card h3 { color: #dce8f7 !important; font-family: Inter, sans-serif !important; letter-spacing: 0 !important; }
+        .stat-card .value { font-size: 1.65rem !important; }
+        table th { background: #f1f5fa !important; color: #53657a; font-size: .75rem; text-transform: uppercase; letter-spacing: .04em; }
+        table th, table td { padding: .9rem !important; }
+        .status-badge { border-radius: 99px !important; font-size: .72rem !important; letter-spacing: .03em; }
+        .step-indicator { gap: .5rem; }
+        .step-number { background: #e6edf7; color: var(--ui-muted); }
+        .step.active .step-number { background: var(--ui-blue); }
+        .modal { border-radius: 16px !important; box-shadow: 0 24px 70px #102a4333 !important; }
+        .modal-header, .modal-footer { padding: 1.1rem 1.4rem !important; }
+        .modal-body { padding: 1.4rem !important; }
+        .finora-hero { max-width: 1180px; padding-top: 4.5rem; }
+        .hero-copy h1 { font-size: clamp(2.5rem, 5vw, 4.8rem) !important; line-height: 1.02; }
+        .hero-copy h1 em, .public-section h2 em { color: var(--ui-blue) !important; }
+        .hero-visual { border-radius: 18px; background: linear-gradient(145deg, #dceaff, #edf6ff); }
+        .visual-card { background: var(--ui-navy); border-radius: 12px; }
+        .product-grid article { border-radius: 12px; box-shadow: 0 4px 14px #102a4309; }
+        .calculator-card { border: 1px solid var(--ui-border); border-radius: 14px; }
+        .feature-band { background: var(--ui-navy); }
+        @media (max-width: 700px) { nav .logo span { display: none; } .nav-right { gap: .35rem; } .nav-right .nav-link { display: none; } .hero-actions { flex-wrap: wrap; } .product-grid, .process-grid { grid-template-columns: 1fr !important; } .finora-footer { grid-template-columns: 1fr !important; } table { display: block; overflow-x: auto; white-space: nowrap; } }
+    </style>
+    <style>
+        /* Original bright editorial theme */
+        :root { --ui-navy: #152a2b; --ui-blue: #f27561; --ui-bg: #f8f4eb; --ui-text: #152a2b; --ui-muted: #61706f; --ui-border: #d9d6cb; }
+        body { background: #f8f4eb !important; color: #152a2b !important; font-family: Manrope, Arial, sans-serif !important; }
+        nav { background: #f8f4eb !important; border-bottom: 0 !important; box-shadow: none !important; }
+        nav .logo { color: #152a2b !important; font-family: Manrope, Arial, sans-serif !important; font-size: 1.55rem !important; }
+        nav .logo span { color: #61706f !important; }
+        nav button:not(.btn), .nav-link { color: #152a2b !important; }
+        .nav-apply, .btn-primary { background: #152a2b !important; color: #fff !important; border-radius: 0 !important; box-shadow: none; }
+        h1, h2, h3, .hero-copy h1, .public-section h2 { font-family: 'Playfair Display', Georgia, serif !important; letter-spacing: -.06em !important; color: #152a2b !important; }
+        h1 { font-size: clamp(3rem, 5.4vw, 5rem) !important; }
+        .card { border: 0; border-radius: 0 !important; box-shadow: 0 8px 20px #152a2b0d !important; }
+        .finora-hero { padding-top: 4rem; }
+        .hero-copy h1 { font-size: clamp(2.7rem, 4.5vw, 4.4rem) !important; }
+        .hero-copy h1 em, .public-section h2 em { color: #f27561 !important; }
+        .hero-visual { border-radius: 0; background: #f7c850; }
+        .visual-sun { background: #f27561; }
+        .visual-card { background: #152a2b; border-radius: 0; box-shadow: 18px 18px 0 #fffdf8; }
+        .feature-band { background: #152a2b; }
+        .product-grid article { border-radius: 0; box-shadow: none; background: #fffdf8; }
+        .product-grid article:hover { box-shadow: 8px 8px 0 #f27561; transform: translateY(-3px); }
+        .product-icon { background: #f7c850; color: #152a2b; border-radius: 50%; }
+        .calculator-card { border-radius: 0; box-shadow: 10px 10px 0 #c5b4ea; }
+        .calculator-card input { accent-color: #f27561; }
+        .eligibility-band { background: #c9e65c; }
+        .finora-footer { background: #152a2b; }
+        .stat-card { border-radius: 0 !important; }
+        .stat-card.stat1 { background: #152a2b !important; }
+        .stat-card.stat2 { background: #f27561 !important; }
+        .stat-card.stat3 { background: #c5b4ea !important; color: #152a2b; }
+        .stat-card.stat4 { background: #f7c850 !important; color: #152a2b; }
+        .stat-card h3 { color: inherit !important; }
+        .status-badge { border-radius: 20px !important; }
+        @media (max-width: 700px) { .hero-copy h1 { font-size: 2.55rem !important; } }
+    </style>
+    <style>
+        /* Slightly tighter typography */
+        body { font-size: 13px !important; }
+        h1 { font-size: clamp(2.6rem, 4.5vw, 4.2rem) !important; }
+        h2 { font-size: clamp(1.55rem, 2.7vw, 2.2rem) !important; }
+        h3 { font-size: 1.15rem !important; }
+        .hero-copy h1 { font-size: clamp(2.5rem, 4.2vw, 4.1rem) !important; }
+        .hero-lead { font-size: .95rem; }
+        .public-section h2 { font-size: 3rem !important; }
+        .stat-card .value { font-size: 1.45rem !important; }
+        .stat-card h3 { font-size: .78rem !important; }
+        .card h2 { margin-bottom: 1rem !important; }
+        @media (max-width: 700px) { .hero-copy h1 { font-size: 2.45rem !important; } .public-section h2 { font-size: 2.45rem !important; } }
+    </style>
+</head>
+<body>
+    <!-- Navigation -->
+    <nav>
+        <a href="#" class="logo" onclick="goHome(); return false;">Acuity Finance <span>finance made simple.</span></a>
+        <div class="nav-right">
+            <a class="nav-link" href="#loans">Loans</a>
+            <a class="nav-link" href="#calculator">EMI Calculator</a>
+            <a class="nav-link" href="#how">How It Works</a>
+            <button type="button" class="nav-link" onclick="showPage('adminLogin')">Staff Login</button>
+            <button onclick="showPage('login')" id="navLogin">Login</button>
+            <button class="btn btn-primary nav-apply" onclick="showPage('register')">Apply Now</button>
+            <button onclick="goHome()" id="navLogout" class="d-none">Logout</button>
+        </div>
+    </nav>
+
+    <!-- Home Page -->
+    <div class="page active" id="home">
+        <section class="finora-hero">
+            <div class="hero-copy">
+                <p class="hero-kicker">CLEAR FINANCE FOR REAL LIFE</p>
+                <h1>Get the financial support you need, <em>with confidence.</em></h1>
+                <p class="hero-lead">Explore flexible loan options, check your eligibility, calculate your EMI and apply online through a simple and transparent process.</p>
+                <div class="hero-actions"><button class="btn btn-primary" onclick="document.getElementById('eligibility').scrollIntoView({behavior:'smooth'})">Check Eligibility</button><button class="btn btn-outline" onclick="showPage('register')">Apply for a Loan</button></div>
+                <p class="trust-line">Simple process <span>•</span> Transparent terms <span>•</span> Secure application</p>
+            </div>
+            <div class="hero-visual"><div class="visual-badge">ACUITY / 01</div><div class="visual-sun"></div><div class="visual-card"><small>YOUR NEXT STEP</small><strong>Clarity today.<br>Possibility tomorrow.</strong><span>↗</span></div><div class="visual-stat"><b>₹ 3,00,000</b><small>Example loan plan</small></div></div>
+        </section>
+        <section class="feature-band"><div><strong>10.5%+</strong><span>Indicative rates</span></div><div><strong>6-60 mo</strong><span>Flexible tenure</span></div><div><strong>5 min</strong><span>To get started</span></div><div><strong>24/7</strong><span>Application tracking</span></div></section>
+        <section class="public-section" id="loans"><p class="section-kicker">LOANS DESIGNED AROUND YOUR NEEDS</p><h2>One clear place to find your <em>next move.</em></h2><div class="product-grid"><article><span class="product-icon">PL</span><h3>Personal Loan</h3><p>Flexible funds for the plans that matter to you.</p><b>₹25K - ₹10L</b><small>12 - 60 months</small><button class="text-action" onclick="showPage('register')">Explore loan →</button></article><article><span class="product-icon">BL</span><h3>Business Loan</h3><p>Working capital for your next stage of growth.</p><b>₹1L - ₹25L</b><small>12 - 60 months</small><button class="text-action" onclick="showPage('register')">Explore loan →</button></article><article><span class="product-icon">HL</span><h3>Home Loan</h3><p>Plan your home purchase with more confidence.</p><b>₹5L - ₹50L</b><small>5 - 20 years</small><button class="text-action" onclick="showPage('register')">Explore loan →</button></article><article><span class="product-icon">EL</span><h3>Education Loan</h3><p>Support for the learning journey ahead.</p><b>₹50K - ₹20L</b><small>1 - 10 years</small><button class="text-action" onclick="showPage('register')">Explore loan →</button></article></div></section>
+        <section class="public-section split-section" id="calculator"><div><p class="section-kicker">EMI CALCULATOR</p><h2>Know your payment before you <em>apply.</em></h2><p>Adjust the amount, interest rate and tenure for an instant indicative repayment breakdown.</p><p class="disclaimer">EMIs are illustrative. Final terms depend on assessment and verification.</p></div><div class="calculator-card"><label>Loan amount <output id="amountOut">₹3,00,000</output></label><input id="amount" type="range" min="10000" max="1000000" step="10000" value="300000"><label>Annual interest rate <output id="rateOut">10.5%</output></label><input id="rate" type="range" min="8" max="24" step=".1" value="10.5"><label>Tenure <output id="termOut">36 months</output></label><input id="term" type="range" min="6" max="60" step="6" value="36"><div class="emi-total"><small>Estimated monthly EMI</small><strong id="emiOut">₹9,751</strong><span id="repaymentOut">Total repayment: ₹3,51,036</span></div><div class="emi-breakdown"><span>Principal <b id="principalOut">₹3,00,000</b></span><span>Total interest <b id="interestOut">₹51,036</b></span></div></div></section>
+        <section class="public-section" id="how"><p class="section-kicker">HOW IT WORKS</p><h2>From curiosity to <em>confidence.</em></h2><div class="process-grid"><article><b>01</b><h3>Choose your loan</h3><p>Compare options designed around your goal.</p></article><article><b>02</b><h3>Check eligibility</h3><p>Get an indicative view in a few steps.</p></article><article><b>03</b><h3>Apply securely</h3><p>Share only what is needed for assessment.</p></article><article><b>04</b><h3>Track progress</h3><p>Stay informed as your application moves.</p></article></div></section>
+        <section class="eligibility-band" id="eligibility"><div><p class="section-kicker">A CLEARER PICTURE</p><h2>Not sure which loan fits you?</h2><p>Check your eligibility in a few simple steps.</p></div><button class="btn btn-primary" onclick="showPage('register')">Check Eligibility →</button></section>
+        <section class="public-section trust-section"><div><p class="section-kicker">WHY ACUITY FINANCE</p><h2>Finance that respects your <em>decisions.</em></h2></div><div class="trust-list"><p><b>01</b><span><strong>Transparent information</strong>Understand indicative rates, fees and repayments before you proceed.</span></p><p><b>02</b><span><strong>Secure application</strong>Your account and application data stay connected to protected access.</span></p><p><b>03</b><span><strong>Human support</strong>Clear guidance when you need help with your next step.</span></p></div></section>
+        <section class="public-section faq-preview" id="faq"><p class="section-kicker">COMMON QUESTIONS</p><h2>Questions, answered <em>plainly.</em></h2><details><summary>How is my EMI calculated?</summary><p>Your EMI is based on the principal, monthly interest rate and repayment tenure. The calculator gives an indicative result.</p></details><details><summary>Does checking eligibility guarantee approval?</summary><p>No. Eligibility results and rates are indicative. Final approval depends on verification and lender assessment.</p></details><details><summary>What documents might I need?</summary><p>Identity, address and income documents may be requested depending on the loan and assessment.</p></details></section>
+        <footer class="finora-footer"><div><strong>Acuity Finance</strong><p>Finance made simple.</p></div><div><b>Explore</b><a href="#loans">Loans</a><a href="#calculator">EMI Calculator</a><a href="#how">How It Works</a></div><div><b>Support</b><a href="#faq">FAQs</a><a href="#contact">Contact</a><a href="#">Privacy & Terms</a></div><div id="contact"><b>Need a hand?</b><p><strong>Call us: 8329827093</strong></p><p><strong>acuityfinance99@gmail.com</strong></p><p>Mon-Sat, 9:00 AM-6:00 PM</p></div></footer>
+    </div>
+
+    <!-- Login Page -->
+    <div class="page" id="login">
+        <div class="container" style="max-width: 400px;">
+            <div class="card">
+                <h2 id="loginTitle">Sign In</h2>
+                <div class="alert alert-info d-none" id="loginAlert"></div>
+                <form onsubmit="handleLogin(event)">
+                    <div class="form-row full">
+                        <label>Email *</label>
+                        <input type="email" name="email" required>
+                    </div>
+                    <div class="form-row full">
+                        <label>Password *</label>
+                        <input type="password" name="password" required>
+                    </div>
+                    <button type="submit" class="btn btn-primary btn-block">Sign In</button>
+                </form>
+                <p style="text-align: center; margin-top: 1rem;">
+                    Don't have an account? <button class="btn btn-secondary" onclick="showPage('register')" style="background: none; color: #1a73e8; padding: 0;">Register here</button>
+                </p>
+            </div>
+        </div>
+    </div>
+
+    <!-- Staff Login -->
+    <div class="page" id="adminLogin">
+        <div class="container" style="max-width: 440px;">
+            <div class="card staff-login-card">
+                <p class="section-kicker">ACUITY FINANCE / STAFF PORTAL</p>
+                <h2>Staff Sign In</h2>
+                <p class="text-muted">Authorized staff can review client profiles, applications, documents, and status history.</p>
+                <div class="alert alert-info d-none" id="adminLoginAlert"></div>
+                <form onsubmit="handleAdminLogin(event)">
+                    <div class="form-row full">
+                        <label>Staff email *</label>
+                        <input type="email" name="email" required autocomplete="username">
+                    </div>
+                    <div class="form-row full">
+                        <label>Password *</label>
+                        <input type="password" name="password" required autocomplete="current-password">
+                    </div>
+                    <button type="submit" class="btn btn-primary btn-block">Open Staff Panel</button>
+                </form>
+                <p style="text-align: center; margin-top: 1rem;">Client? <button class="btn btn-secondary" onclick="showPage('login')" style="background: none; color: #1a73e8; padding: 0;">Sign in here</button></p>
+            </div>
+        </div>
+    </div>
+
+    <!-- Registration Page -->
+    <div class="page" id="register">
+        <div class="container" style="max-width: 480px;">
+            <div class="card">
+                <h2>Create Account</h2>
+                <div class="alert alert-info d-none" id="registerAlert"></div>
+                <form onsubmit="handleRegister(event)">
+                    <div class="form-row">
+                        <div>
+                            <label>Full Name *</label>
+                            <input type="text" name="full_name" required>
+                        </div>
+                        <div>
+                            <label>Email *</label>
+                            <input type="email" name="email" required>
+                        </div>
+                    </div>
+                    <div class="form-row full">
+                        <label>Mobile Number *</label>
+                        <input type="tel" name="phone" pattern="[0-9]{10}" placeholder="10-digit number" required>
+                    </div>
+                    <div class="form-row full">
+                        <label>Password (min 8 characters) *</label>
+                        <input type="password" name="password" minlength="8" required>
+                    </div>
+                    <div class="form-row">
+                        <div>
+                            <label>Employment Type *</label>
+                            <select name="employment_type" required>
+                                <option value="">Select employment type</option>
+                                <option>Salaried</option>
+                                <option>Self-employed</option>
+                                <option>Business owner</option>
+                                <option>Retired</option>
+                                <option>Student</option>
+                            </select>
+                        </div>
+                        <div>
+                            <label>Monthly Income (Rs.) *</label>
+                            <input type="number" name="monthly_income" min="0" step="1000" required>
+                        </div>
+                    </div>
+
+                    <button type="submit" class="btn btn-primary btn-block mt">Create Account</button>
+                </form>
+                <p style="text-align: center; margin-top: 1rem;">
+                    Already have an account? <button class="btn btn-secondary" onclick="showPage('login')" style="background: none; color: #1a73e8; padding: 0;">Sign in here</button>
+                </p>
+            </div>
+        </div>
+    </div>
+
+    <!-- Client Dashboard -->
+    <div class="page" id="dashboard">
+        <div class="container">
+            <h1 id="dashboardTitle">Welcome!</h1>
+            
+            <!-- Tabs -->
+            <div style="background: white; border-radius: 8px; overflow: hidden; margin-bottom: 2rem;">
+                <div style="display: flex; border-bottom: 1px solid #ddd;">
+                    <button class="tab-btn" onclick="showTab('overview')" style="flex: 1; padding: 1rem; background: #1a73e8; color: white; border: none; cursor: pointer;">Overview</button>
+                    <button class="tab-btn" onclick="showTab('profile')" style="flex: 1; padding: 1rem; background: #f5f5f5; color: #333; border: none; cursor: pointer;">My Profile</button>
+                    <button class="tab-btn" onclick="showTab('applications')" style="flex: 1; padding: 1rem; background: #f5f5f5; color: #333; border: none; cursor: pointer;">My Applications</button>
+                </div>
+            </div>
+
+            <!-- Overview Tab -->
+            <div id="overview" class="tab-content">
+                <div class="stats" id="dashStats"></div>
+                <div class="card">
+                    <h2>Recent Applications</h2>
+                    <div id="recentApps"></div>
+                </div>
+            </div>
+
+            <!-- Profile Tab -->
+            <div id="profile" class="tab-content d-none">
+                <div class="card">
+                    <h2>My Profile</h2>
+                    <div id="profileContent"></div>
+                    <button class="btn btn-secondary mt" onclick="toggleEditProfile()">Edit Profile</button>
+                    <form id="editProfileForm" class="d-none" onsubmit="saveProfile(event)" style="margin-top: 1.5rem;">
+                        <div class="form-row">
+                            <div>
+                                <label>Full Name *</label>
+                                <input type="text" name="full_name" required>
+                            </div>
+                            <div>
+                                <label>Email *</label>
+                                <input type="email" name="email" required disabled>
+                            </div>
+                        </div>
+                        <div class="form-row">
+                            <div>
+                                <label>Phone *</label>
+                                <input type="tel" name="phone" pattern="[0-9]{10}" required>
+                            </div>
+                            <div>
+                                <label>Monthly Income (Rs.)</label>
+                                <input type="number" name="monthly_income" step="1000">
+                            </div>
+                        </div>
+                        <div class="form-row">
+                            <div>
+                                <label>Employment Type</label>
+                                <select name="employment_type">
+                                    <option value="">Select employment type</option>
+                                    <option>Salaried</option>
+                                    <option>Self-employed</option>
+                                    <option>Business owner</option>
+                                    <option>Retired</option>
+                                    <option>Student</option>
+                                </select>
+                            </div>
+                            <div>
+                                <label>Company / Business Name</label>
+                                <input type="text" name="company_name">
+                            </div>
+                        </div>
+                        <div class="form-row">
+                            <div>
+                                <label>Date of Birth</label>
+                                <input type="date" name="date_of_birth">
+                            </div>
+                            <div>
+                                <label>Gender</label>
+                                <select name="gender">
+                                    <option value="">Prefer not to say</option>
+                                    <option>Female</option>
+                                    <option>Male</option>
+                                    <option>Non-binary</option>
+                                </select>
+                            </div>
+                        </div>
+                        <div class="form-row full">
+                            <label>Address</label>
+                            <textarea name="address" rows="2"></textarea>
+                        </div>
+                        <div class="form-row">
+                            <div>
+                                <label>City</label>
+                                <input type="text" name="city">
+                            </div>
+                            <div>
+                                <label>State</label>
+                                <input type="text" name="state">
+                            </div>
+                        </div>
+                        <div class="form-row">
+                            <div>
+                                <label>Pincode</label>
+                                <input type="text" name="pincode" inputmode="numeric" pattern="[0-9]{6}">
+                            </div>
+                            <div>
+                                <label>PAN</label>
+                                <input type="text" name="pan" style="text-transform: uppercase;">
+                            </div>
+                        </div>
+                        <div class="form-row">
+                            <button type="submit" class="btn btn-primary">Save Changes</button>
+                            <button type="button" class="btn btn-secondary" onclick="toggleEditProfile()">Cancel</button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+
+            <!-- Applications Tab -->
+            <div id="applications" class="tab-content d-none">
+                <div class="card">
+                    <h2>My Loan Applications</h2>
+                    <button class="btn btn-primary" onclick="showPage('newApplication')" style="margin-bottom: 1rem;">New Application</button>
+                    <table id="myApplicationsTable">
+                        <thead>
+                            <tr>
+                                <th>Application ID</th>
+                                <th>Loan Type</th>
+                                <th>Amount (Rs.)</th>
+                                <th>Status</th>
+                                <th>Date</th>
+                                <th>Action</th>
+                            </tr>
+                        </thead>
+                        <tbody></tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- New Application Page -->
+    <div class="page" id="newApplication">
+        <div class="container" style="max-width: 600px;">
+            <div class="card">
+                <h2>New Loan Application</h2>
+                <div class="step-indicator" id="stepIndicator"></div>
+                <div class="alert alert-info d-none" id="appAlert"></div>
+                
+                <form onsubmit="submitApplication(event)" id="appForm">
+                    <div class="form-row full">
+                        <label>Loan Type *</label>
+                        <select name="loan_type" required>
+                            <option value="">Select Loan Type</option>
+                            <option>Personal Loan</option>
+                            <option>Home Loan</option>
+                            <option>Education Loan</option>
+                            <option>Business Loan</option>
+                            <option>Vehicle Loan</option>
+                            <option>Loan Against Property</option>
+                        </select>
+                    </div>
+                    <div class="form-row">
+                        <div>
+                            <label>Loan Amount (Rs.) *</label>
+                            <input type="number" name="loan_amount" min="10000" step="1000" required>
+                        </div>
+                        <div>
+                            <label>Tenure (months) *</label>
+                            <select name="tenure" required>
+                                <option value="">Select</option>
+                                <option value="12">12 months</option>
+                                <option value="24">24 months</option>
+                                <option value="36" selected>36 months</option>
+                                <option value="48">48 months</option>
+                                <option value="60">60 months</option>
+                            </select>
+                        </div>
+                    </div>
+                    <div class="form-row full">
+                        <label>Purpose of Loan *</label>
+                        <input type="text" name="purpose" placeholder="e.g., Home renovation, Wedding, etc." required>
+                    </div>
+                    <div class="form-row full">
+                        <label>Monthly Income (Rs.) *</label>
+                        <input type="number" name="monthly_income" step="1000" required>
+                    </div>
+                    <div class="form-row full">
+                        <label>Existing EMI (Rs.)</label>
+                        <input type="number" name="existing_emi" value="0" step="1000">
+                    </div>
+                    
+                    <div style="margin-top: 2rem; display: flex; gap: 1rem;">
+                        <button type="button" class="btn btn-secondary" onclick="showPage('dashboard')">Cancel</button>
+                        <button type="submit" class="btn btn-primary" style="flex: 1;">Submit Application</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <!-- Application Details -->
+    <div class="page" id="applicationDetails">
+        <div class="container">
+            <button class="btn btn-secondary" onclick="showPage('dashboard')" style="margin-bottom: 1rem;">Back to Dashboard</button>
+            <div id="appDetailsContent"></div>
+        </div>
+    </div>
+
+    <!-- Admin Dashboard -->
+    <div class="page" id="adminDashboard">
+        <div class="container">
+            <h1>Admin Dashboard</h1>
+            
+            <div class="stats" id="adminStats"></div>
+            
+            <!-- Tabs -->
+            <div style="background: white; border-radius: 8px; overflow: hidden; margin-bottom: 2rem;">
+                <div style="display: flex; border-bottom: 1px solid #ddd;">
+                    <button class="tab-btn" onclick="showAdminTab('clients')" style="flex: 1; padding: 1rem; background: #1a73e8; color: white; border: none; cursor: pointer;">Clients</button>
+                    <button class="tab-btn" onclick="showAdminTab('applications')" style="flex: 1; padding: 1rem; background: #f5f5f5; color: #333; border: none; cursor: pointer;">Applications</button>
+                </div>
+            </div>
+
+            <!-- Clients Tab -->
+            <div id="adminClients" class="tab-content">
+                <div class="card">
+                    <h2>Registered Clients</h2>
+                    <div style="margin-bottom: 1rem;">
+                        <input type="text" placeholder="Search by name, email, or client ID" id="clientSearch" style="width: 100%; padding: 0.75rem; border: 1px solid #ddd; border-radius: 4px;">
+                    </div>
+                    <table id="clientsTable">
+                        <thead>
+                            <tr>
+                                <th>Client ID</th>
+                                <th>Name</th>
+                                <th>Email</th>
+                                <th>Phone</th>
+                                <th>Employment</th>
+                                <th>Monthly Income</th>
+                                <th>Applications</th>
+                                <th>Action</th>
+                            </tr>
+                        </thead>
+                        <tbody></tbody>
+                    </table>
+                </div>
+            </div>
+
+            <!-- Applications Tab -->
+            <div id="adminApplications" class="tab-content d-none">
+                <div class="card">
+                    <h2>Loan Applications</h2>
+                    <div style="margin-bottom: 1rem;">
+                        <div class="form-row" style="margin-bottom: 0;">
+                            <input type="text" placeholder="Search application ID or client name" id="appSearch">
+                            <select id="statusFilter">
+                                <option value="">All Status</option>
+                                <option>PENDING</option>
+                                <option>DOCUMENT_VERIFICATION</option>
+                                <option>UNDER_REVIEW</option>
+                                <option>APPROVED</option>
+                                <option>REJECTED</option>
+                                <option>DISBURSED</option>
+                            </select>
+                        </div>
+                    </div>
+                    <table id="applicationsTable">
+                        <thead>
+                            <tr>
+                                <th>Application ID</th>
+                                <th>Client</th>
+                                <th>Loan Type</th>
+                                <th>Amount (Rs.)</th>
+                                <th>Date</th>
+                                <th>Status</th>
+                                <th>Action</th>
+                            </tr>
+                        </thead>
+                        <tbody></tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Admin Client Details Modal -->
+    <div class="modal-overlay" id="clientDetailsModal">
+        <div class="modal">
+            <div class="modal-header">
+                <h2>Client Details</h2>
+                <button class="modal-close" onclick="closeModal('clientDetailsModal')">&times;</button>
+            </div>
+            <div class="modal-body" id="clientDetailsContent"></div>
+            <div class="modal-footer">
+                <button class="btn btn-secondary" onclick="closeModal('clientDetailsModal')">Close</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Admin Application Details Modal -->
+    <div class="modal-overlay" id="appDetailsModal">
+        <div class="modal">
+            <div class="modal-header">
+                <h2>Application Details</h2>
+                <button class="modal-close" onclick="closeModal('appDetailsModal')">&times;</button>
+            </div>
+            <div class="modal-body" id="appDetailsModalContent"></div>
+            <div class="modal-footer">
+                <button class="btn btn-secondary" onclick="closeModal('appDetailsModal')">Close</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Toast Notification -->
+    <div id="toast" style="position: fixed; bottom: 20px; right: 20px; background: white; padding: 1rem 1.5rem; border-radius: 4px; box-shadow: 0 4px 12px rgba(0,0,0,0.15); display: none; z-index: 2000;"></div>
+
+    <script src="script.js"></script>
+</body>
+</html>
