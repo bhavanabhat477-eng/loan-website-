@@ -39,5 +39,23 @@ app.put('/api/admin/applications/:id/status',auth('ADMIN'),async(req,res)=>{cons
 app.get('/api/documents/:id/download',auth(),async(req,res)=>{const d=await one('SELECT d.*,a.user_id application_owner FROM application_documents d JOIN loan_applications a ON a.id=d.application_id WHERE d.id=?',[req.params.id]);if(!d||(req.user.role!=='ADMIN'&&d.application_owner!==req.user.id))return fail(res,404,'Not found');const file=path.resolve(ROOT,d.file_path);if(!file.startsWith(`${path.resolve(UPLOADS)}${path.sep}`)||!fs.existsSync(file))return fail(res,404,'Not found');res.download(file,safeName(d.file_name));});
 app.use('/api',(req,res)=>fail(res,404,'Not found or unauthorized.'));app.use((req,res,next)=>{const n=path.basename(req.path).toLowerCase();if(path.extname(n)==='.db'||n.startsWith('server.')||['.env','package.json','package-lock.json'].includes(n)||req.path.startsWith('/private_uploads/'))return fail(res,404,'Not found');next();});app.use(express.static(ROOT,{dotfiles:'deny',index:'index.html',fallthrough:true}));app.get(['/','/admin'],(req,res)=>res.sendFile(path.join(ROOT,'index.html')));
 app.use((e,req,res,next)=>{if(e instanceof multer.MulterError&&e.code==='LIMIT_FILE_SIZE')return fail(res,400,'A document file is too large.');if(e&&e.message==='Invalid document file type.')return fail(res,400,e.message);if(e&&e.message==='Origin not allowed')return fail(res,403,'Origin not allowed.');console.error('Request failed:',e&&e.message);return fail(res,500,'An unexpected error occurred.');});
-async function start(){await initialiseDatabase();app.listen(PORT,'0.0.0.0',()=>console.log(`Acuity Finance listening on port ${PORT}`));}
-if(require.main===module)start().catch(e=>{console.error('Startup failed:',e.message);process.exit(1);});module.exports={app,pool,initialiseDatabase,validateConfiguration,hashPassword,verifyPassword};
+app.listen(PORT, '0.0.0.0', () => {
+  console.log(`Acuity Finance listening on port ${PORT}`);
+});
+
+initialiseDatabase()
+  .then(() => {
+    console.log('Database initialized successfully');
+  })
+  .catch((e) => {
+    console.error('Database initialization failed:', e.message);
+  });
+
+module.exports = {
+  app,
+  pool,
+  initialiseDatabase,
+  validateConfiguration,
+  hashPassword,
+  verifyPassword
+};
